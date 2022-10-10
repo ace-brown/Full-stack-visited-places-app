@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 
 const placesRoutes = require("./routes/places-routes");
 const usersRoutes = require("./routes/users-routes");
@@ -28,4 +29,11 @@ app.use((error, req, res, next) => {
     .json({ message: error.message || "An unknown error accured!" });
 });
 
-app.listen(5000);
+mongoose
+  .connect(
+    "mongodb+srv://fullstack_visited_place_app:TcZGruCxEqUCopik@cluster0.zo6mc77.mongodb.net/places?retryWrites=true&w=majority"
+  )
+  .then(app.listen(5000))
+  .catch((err) => {
+    console.log(err);
+  });
