@@ -1,25 +1,10 @@
 const HttpError = require("../models/http-error");
 const { validationResult } = require("express-validator");
-const uuid = require("uuid");
 
 const getCoordsForAddress = require("../util/location");
 const Place = require("../models/place");
-
-let DUMMY_PLACES = [
-  {
-    id: "p1",
-    title: "Santorini",
-    description: "Santorini is one of the Cyclades islands in the Aegean Sea.",
-    imageUrl:
-      "https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=435&q=80",
-    address: "Caldera-Akrotiri, Thira 827 01, Greece",
-    location: {
-      lat: 36.393154,
-      lng: 25.46151,
-    },
-    creator: "u1",
-  },
-];
+const User = require("../models/user");
+const mongoose = require("mongoose");
 
 // Getting place by placeId ==========================================================
 const getPlaceById = async (req, res, next) => {
@@ -85,6 +70,7 @@ const createPlace = async (req, res, next) => {
 
   const { title, description, address, creator } = req.body;
 
+  // Adding coordinates
   let coordinates;
   try {
     coordinates = await getCoordsForAddress(address);
@@ -92,6 +78,7 @@ const createPlace = async (req, res, next) => {
     return next(error);
   }
 
+  // Creating place
   const createdPlace = new Place({
     title,
     description,
@@ -102,8 +89,37 @@ const createPlace = async (req, res, next) => {
     creator,
   });
 
+  // Before saving place in db, check whether userId of creator already exists in db
+  let user;
   try {
-    await createdPlace.save();
+    user = await User.findById(creator);
+  } catch (err) {
+    const error = new HttpError(
+      "Creating place failed, please try agian later",
+      500
+    );
+    return next(error);
+  }
+
+  // If the creator(user) is not in db we send this error
+  if (!user) {
+    const error = new HttpError(
+      "Could not find the user for the provided id!",
+      404
+    );
+    return next(error);
+  }
+
+  // Now that creator(user) exist, we can do two things:
+  // 1-Saving place in db
+  // 2-Add the placeId to the corresponding user document
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await createdPlace.save({ session: sess });
+    user.places.push(createdPlace);
+    await user.save({ session: sess });
+    await sess.commitTransaction();
   } catch (err) {
     const error = new HttpError(
       "Creating place failed, please try again!",
@@ -116,33 +132,81 @@ const createPlace = async (req, res, next) => {
 };
 
 // Update place =====================================================================
-const updatePlace = (req, res) => {
+const updatePlace = async (req, res, next) => {
   // Validation
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    throw new HttpError("Invalid inputs passed, please check your data!", 422);
+    return next(
+      new HttpError("Invalid inputs passed, please check your data!", 422)
+    );
   }
 
   const { title, description } = req.body;
   const placeId = req.params.pid;
 
-  const updatedPlace = { ...DUMMY_PLACES.find((p) => p.id === placeId) };
-  const placeIndex = DUMMY_PLACES.findIndex((p) => p.id === placeId);
-  updatedPlace.title = title;
-  updatedPlace.description = description;
+  let place;
+  try {
+    place = await Place.findById(placeId);
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not update data!",
+      500
+    );
+    return next(error);
+  }
 
-  DUMMY_PLACES[placeIndex] = updatedPlace;
+  place.title = title;
+  place.description = description;
 
-  res.status(200).json({ place: updatedPlace });
+  try {
+    await place.save();
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not update the place!",
+      500
+    );
+    return next(error);
+  }
+
+  res.status(200).json({ place: place.toObject({ getters: true }) });
 };
 
-// Delete place ======================================================================
-const deletePlace = (req, res) => {
-  const placeId = req.params.body;
-  if (!DUMMY_PLACES.find((p) => p.id === placeId)) {
-    throw new HttpError("Could not find the place with this id!", 404);
+// Delete place =====================================================================
+const deletePlace = async (req, res, next) => {
+  const placeId = req.params.pid;
+
+  let place;
+  try {
+    place = await Place.findById(placeId).populate("creator");
+  } catch (err) {
+    const error = new HttpError(
+      "Something went wrong, could not delete the place!",
+      500
+    );
+    return next(error);
   }
-  const DUMMY_PLACES = DUMMY_PLACES.filter((p) => p.id !== placeId);
+
+  // If we couldn't find a place by that id
+  if (!place) {
+    const error = new HttpError("Could not find place for this id.", 404);
+    return next(error);
+  }
+
+  // Deleting from db
+  try {
+    const sess = await mongoose.startSession();
+    sess.startTransaction();
+    await place.remove({ session: sess });
+    place.creator.places.pull(place);
+    await place.creator.save({ session: sess });
+    await sess.commitTransaction();
+  } catch (err) {
+    const error = new HttpError(
+      "Deletion process failed, could not delete the place!",
+      500
+    );
+    return next(error);
+  }
 
   res.status(200).json({ message: "Deleted Item!" });
 };
