@@ -1,0 +1,12 @@
+{
+  "name": "visited",
+  "private": true,
+  "description": "Visited - share the places you have been to (local demo)",
+  "scripts": {
+    "postinstall": "npm --prefix server install && npm --prefix client install",
+    "dev": "concurrently -n server,client -c blue,magenta \"npm --prefix server start\" \"npm --prefix client start\""
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}

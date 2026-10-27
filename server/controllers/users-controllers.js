@@ -10,7 +10,7 @@ const getUsers = async (req, res, next) => {
   // Only send name and email of users, and not data like password
   let users;
   try {
-    users = await User.find({}, "-password");
+    users = User.findAll();
   } catch (err) {
     const error = new HttpError(
       "Fetching users failed, please try again later!",
@@ -19,7 +19,7 @@ const getUsers = async (req, res, next) => {
     return next(error);
   }
 
-  res.json({ users: users.map((user) => user.toObject({ getters: true })) });
+  res.json({ users });
 };
 
 // Signup ==============================================================
@@ -36,7 +36,7 @@ const signup = async (req, res, next) => {
 
   let existingUser;
   try {
-    existingUser = await User.findOne({ email: email });
+    existingUser = User.findByEmail(email);
   } catch (err) {
     const error = new HttpError("Something went wrong, signup failed!", 500);
     return next(error);
@@ -61,16 +61,14 @@ const signup = async (req, res, next) => {
   }
 
   // Creating user
-  const createdUser = new User({
-    name,
-    email,
-    image: req.file.path.replace(/\\/g, "/"),
-    password: hashedPassword,
-    places: [],
-  });
-
+  let createdUser;
   try {
-    await createdUser.save();
+    createdUser = User.create({
+      name,
+      email,
+      image: req.file.path.replace(/\\/g, "/"),
+      password: hashedPassword,
+    });
   } catch (err) {
     const error = new HttpError("Signup failed, please try again later!", 500);
     return next(error);
@@ -101,7 +99,7 @@ const login = async (req, res, next) => {
   // Email validation
   let existingUser;
   try {
-    existingUser = await User.findOne({ email: email });
+    existingUser = User.findByEmail(email);
   } catch (err) {
     const error = new HttpError("Something went wrong, logging in failed!", 500);
     return next(error);

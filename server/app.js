@@ -1,12 +1,14 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
-const mongoose = require("mongoose");
 
 // Load server/.env if present (optional, Node >= 20.12)
 try {
   process.loadEnvFile(path.join(__dirname, ".env"));
 } catch (err) {}
+
+// Local demo default, so the server runs without any configuration
+process.env.JWT_KEY = process.env.JWT_KEY || "visited-local-dev-secret";
 
 const placesRoutes = require("./routes/places-routes");
 const usersRoutes = require("./routes/users-routes");
@@ -73,16 +75,5 @@ app.use((error, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-const MONGODB_URI =
-  process.env.MONGODB_URI ||
-  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.zo6mc77.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
-  })
-  .catch((err) => {
-    console.log(err);
-    process.exit(1);
-  });
+app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));

@@ -1,49 +1,45 @@
 # Visited
 
-A full-stack app for sharing the places you've visited. Users sign up with a profile picture, then add, edit and delete places with photos and view each one on a map.
+A full-stack demo app for sharing the places you've visited. Users sign up with a profile picture, then add, edit and delete places with photos and view each one on a map.
 
 - **Client:** React 19, React Router 7, Vite (`client/`)
-- **Server:** Express 5, Mongoose 9, Multer, JWT auth (`server/`)
+- **Server:** Express 5, SQLite (built into Node), Multer, JWT auth (`server/`)
+
+It runs entirely locally: no database server, accounts or environment variables needed.
 
 ## Requirements
 
-- Node.js 20.19+
-- A MongoDB database that supports transactions, either a MongoDB Atlas cluster or a local replica set
+- Node.js 22.13+ (uses the built-in `node:sqlite` module)
 
 ## Getting started
 
-### Server
-
 ```bash
-cd server
-npm install
-cp .env.example .env   # then fill in your values
-npm start              # nodemon, http://localhost:5000
+npm install   # installs root, server and client dependencies
+npm run dev   # starts the API on http://localhost:5000 and the app on http://localhost:3000
 ```
 
-| Variable | Description |
+Or run each part on its own with `npm start` inside `server/` or `client/`.
+
+## Where data lives
+
+- **Database:** `server/data/visited.db`, created automatically on first start. Delete the `server/data` folder to start fresh.
+- **Uploaded images:** `server/uploads/images`
+
+## Optional configuration
+
+Everything has a working default. To override, copy `server/.env.example` to `server/.env`:
+
+| Variable | Default |
 | --- | --- |
-| `MONGODB_URI` | Full MongoDB connection string (optional, overrides the Atlas variables) |
-| `DB_USER`, `DB_PASSWORD`, `DB_NAME` | Atlas credentials, used when `MONGODB_URI` is not set |
-| `JWT_KEY` | Secret used to sign auth tokens |
-| `PORT` | Port to listen on (default `5000`) |
+| `PORT` | `5000` |
+| `JWT_KEY` | a built-in local development secret |
+| `DB_FILE` | `server/data/visited.db` |
 
-Uploaded images are stored in `server/uploads/images`. Run the server from the `server/` directory.
-
-### Client
-
-```bash
-cd client
-npm install
-npm start              # http://localhost:3000
-npm run build          # production build in client/build
-```
-
-The client talks to `http://localhost:5000` by default. To point it somewhere else, set these in `client/.env.production` or `client/.env.local`:
+If you change the API port, point the client at it in `client/.env.local`:
 
 ```
-VITE_BACKEND_URL=https://your-api.example.com/api
-VITE_ASSET_URL=https://your-api.example.com
+VITE_BACKEND_URL=http://localhost:5000/api
+VITE_ASSET_URL=http://localhost:5000
 ```
 
 ## Upcoming
