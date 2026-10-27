@@ -1,76 +1,73 @@
 .nav-links {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 1.5rem 1rem;
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  gap: 0.25rem;
 }
 
-.nav-links li {
-  margin: 1rem;
-}
-
-.nav-links a {
+.nav-links a,
+.nav-links button {
+  display: block;
+  width: 100%;
+  padding: 0.65rem 0.9rem;
   border: 1px solid transparent;
-  color: #292929;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  color: var(--color-text-muted);
+  background: transparent;
   text-decoration: none;
-  padding: 0.5rem;
+  cursor: pointer;
+  transition: background-color var(--transition), color var(--transition),
+    border-color var(--transition);
 }
 
 .nav-links a:hover,
-.nav-links a:active,
+.nav-links button:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
 .nav-links a.active {
-  background: #f8df00;
-  border-color: #292929;
-  color: #292929;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
 }
 
-.nav-links button {
-  cursor: pointer;
-  border: 1px solid #292929;
-  color: #292929;
-  background: transparent;
-  padding: 0.5rem;
-  font: inherit;
+.nav-links button,
+.nav-links a.nav-links__cta {
+  border-color: var(--color-border);
+  color: var(--color-text);
 }
 
-.nav-links button:focus {
-  outline: none;
+.nav-links a.nav-links__cta {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
-.nav-links button:hover,
-.nav-links button:active {
-  background: #292929;
-  color: white;
+.nav-links a.nav-links__cta:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 
 @media (min-width: 768px) {
   .nav-links {
     flex-direction: row;
+    align-items: center;
+    padding: 0;
   }
 
-  .nav-links li {
-    margin: 0 0.5rem;
-  }
-
-  .nav-links a {
-    color: white;
-    text-decoration: none;
-  }
-
+  .nav-links a,
   .nav-links button {
-    border: 1px solid white;
-    color: white;
-    background: transparent;
+    padding: 0.45rem 0.85rem;
+    text-align: center;
   }
-  
-  .nav-links button:hover,
-  .nav-links button:active {
-    background: #f8df00;
-    color: #292929;
+
+  .nav-links li:last-child {
+    margin-left: 0.5rem;
   }
 }

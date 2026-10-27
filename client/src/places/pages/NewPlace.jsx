@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import Input from "../../shared/components/FormElements/Input";
 import Button from "../../shared/components/FormElements/Button";
@@ -13,6 +13,7 @@ import {
 import { useForm } from "../../shared/hooks/form-hook";
 import { AuthContext } from "../../shared/context/auth-context";
 import { useHttpClient } from "../../shared/hooks/http-hook";
+import { BACKEND_URL } from "../../shared/util/config";
 import "./PlaceForm.css";
 
 const NewPlace = () => {
@@ -40,7 +41,7 @@ const NewPlace = () => {
     false
   );
 
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const placeSubmitHandler = async (event) => {
     event.preventDefault();
@@ -50,19 +51,13 @@ const NewPlace = () => {
       formData.append("title", formState.inputs.title.value);
       formData.append("description", formState.inputs.description.value);
       formData.append("address", formState.inputs.address.value);
-      formData.append("creator", auth.userId);
       formData.append("image", formState.inputs.image.value);
 
-      await sendRequest(
-        process.env.REACT_APP_BACKEND_URL + "/places",
-        "POST",
-        formData,
-        {
-          Authorization: "Bearer " + auth.token,
-        }
-      );
+      await sendRequest(BACKEND_URL + "/places", "POST", formData, {
+        Authorization: "Bearer " + auth.token,
+      });
 
-      history.push("/");
+      navigate(`/${auth.userId}/places`);
     } catch (err) {}
   };
 
@@ -71,6 +66,10 @@ const NewPlace = () => {
       <ErrorModal error={error} onClear={clearError} />
       <form className="place-form" onSubmit={placeSubmitHandler}>
         {isLoading && <LoadingSpinner asOverlay />}
+        <h1 className="place-form__title">Share a place</h1>
+        <p className="place-form__subtitle">
+          Tell other travelers about somewhere you have been.
+        </p>
         <Input
           id="title"
           element="input"
@@ -92,6 +91,7 @@ const NewPlace = () => {
           id="address"
           element="input"
           label="Address"
+          autoComplete="street-address"
           validators={[VALIDATOR_REQUIRE()]}
           errorText="Please enter a valid address."
           onInput={inputHandler}
@@ -101,9 +101,14 @@ const NewPlace = () => {
           onInput={inputHandler}
           errorText="Please provide an image."
         />
-        <Button type="submit" disabled={!formState.isValid}>
-          ADD PLACE
-        </Button>
+        <div className="place-form__actions">
+          <Button ghost onClick={() => navigate(-1)}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={!formState.isValid || isLoading}>
+            Add place
+          </Button>
+        </div>
       </form>
     </React.Fragment>
   );

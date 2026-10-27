@@ -26,7 +26,7 @@ const getUsers = async (req, res, next) => {
 const signup = async (req, res, next) => {
   // Validation
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
+  if (!errors.isEmpty() || !req.file) {
     return next(
       new HttpError("Invalid inputs passed, please check your data!", 422)
     );
@@ -64,7 +64,7 @@ const signup = async (req, res, next) => {
   const createdUser = new User({
     name,
     email,
-    image: req.file.path,
+    image: req.file.path.replace(/\\/g, "/"),
     password: hashedPassword,
     places: [],
   });
@@ -72,7 +72,7 @@ const signup = async (req, res, next) => {
   try {
     await createdUser.save();
   } catch (err) {
-    const error = new HttpError("Signup failed, please try agian later!", 500);
+    const error = new HttpError("Signup failed, please try again later!", 500);
     return next(error);
   }
 
@@ -85,7 +85,7 @@ const signup = async (req, res, next) => {
       { expiresIn: "1h" }
     );
   } catch (err) {
-    const error = new HttpError("Signup failed, please try agian later!", 500);
+    const error = new HttpError("Signup failed, please try again later!", 500);
     return next(error);
   }
 
@@ -103,7 +103,7 @@ const login = async (req, res, next) => {
   try {
     existingUser = await User.findOne({ email: email });
   } catch (err) {
-    const error = new HttpError("Something went wrong, loging in failed!", 500);
+    const error = new HttpError("Something went wrong, logging in failed!", 500);
     return next(error);
   }
 
@@ -111,7 +111,7 @@ const login = async (req, res, next) => {
   if (!existingUser) {
     const error = new HttpError(
       "Credentials seem to be wrong, could not log you in",
-      403
+      401
     );
     return next(error);
   }
@@ -119,7 +119,7 @@ const login = async (req, res, next) => {
   // Checking valid password
   let isValidPassword = false;
   try {
-    isValidPassword = bcrypt.compare(password, existingUser.password);
+    isValidPassword = await bcrypt.compare(password, existingUser.password);
   } catch (err) {
     const error = new HttpError(
       "Could not log you in, please check your credentials and try again.",
@@ -146,7 +146,7 @@ const login = async (req, res, next) => {
     );
   } catch (err) {
     const error = new HttpError(
-      "Logging in failed, please try agian later!",
+      "Logging in failed, please try again later!",
       500
     );
     return next(error);

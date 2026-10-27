@@ -14,6 +14,7 @@ import {
 import { useForm } from "../../shared/hooks/form-hook";
 import { useHttpClient } from "../../shared/hooks/http-hook";
 import { AuthContext } from "../../shared/context/auth-context";
+import { BACKEND_URL } from "../../shared/util/config";
 import "./Auth.css";
 
 const Auth = () => {
@@ -70,7 +71,7 @@ const Auth = () => {
     if (isLoginMode) {
       try {
         const responseData = await sendRequest(
-          process.env.REACT_APP_BACKEND_URL + "/users/login",
+          BACKEND_URL + "/users/login",
           "POST",
           JSON.stringify({
             email: formState.inputs.email.value,
@@ -92,7 +93,7 @@ const Auth = () => {
         formData.append("image", formState.inputs.image.value);
 
         const responseData = await sendRequest(
-          process.env.REACT_APP_BACKEND_URL + "/users/signup",
+          BACKEND_URL + "/users/signup",
           "POST",
           formData
         );
@@ -107,15 +108,22 @@ const Auth = () => {
       <ErrorModal error={error} onClear={clearError} />
       <Card className="authentication">
         {isLoading && <LoadingSpinner asOverlay />}
-        <h2>Login Required</h2>
-        <hr />
+        <h1 className="authentication__title">
+          {isLoginMode ? "Welcome back" : "Create an account"}
+        </h1>
+        <p className="authentication__subtitle">
+          {isLoginMode
+            ? "Log in to share and manage your places."
+            : "Join to start sharing the places you have visited."}
+        </p>
         <form onSubmit={authSubmitHandler}>
           {!isLoginMode && (
             <Input
               element="input"
               id="name"
               type="text"
-              label="Your Name"
+              label="Your name"
+            autoComplete="name"
               validators={[VALIDATOR_REQUIRE()]}
               errorText="Please enter a name."
               onInput={inputHandler}
@@ -123,7 +131,10 @@ const Auth = () => {
           )}
           {!isLoginMode && (
             <ImageUpload
+              center
+              round
               id="image"
+              label="Profile picture"
               onInput={inputHandler}
               errorText="Please provide an image."
             />
@@ -132,7 +143,8 @@ const Auth = () => {
             element="input"
             id="email"
             type="email"
-            label="E-Mail"
+            label="Email"
+            autoComplete="email"
             validators={[VALIDATOR_EMAIL()]}
             errorText="Please enter a valid email address."
             onInput={inputHandler}
@@ -142,17 +154,25 @@ const Auth = () => {
             id="password"
             type="password"
             label="Password"
+            autoComplete={isLoginMode ? "current-password" : "new-password"}
             validators={[VALIDATOR_MINLENGTH(6)]}
             errorText="Please enter a valid password, at least 6 characters."
             onInput={inputHandler}
           />
-          <Button type="submit" disabled={!formState.isValid}>
-            {isLoginMode ? "LOGIN" : "SIGNUP"}
+          <Button
+            type="submit"
+            className="button--block"
+            disabled={!formState.isValid || isLoading}
+          >
+            {isLoginMode ? "Log in" : "Sign up"}
           </Button>
         </form>
-        <Button inverse onClick={switchModeHandler}>
-          SWITCH TO {isLoginMode ? "SIGNUP" : "LOGIN"}
-        </Button>
+        <p className="authentication__switch">
+          {isLoginMode ? "New here?" : "Already have an account?"}{" "}
+          <button type="button" onClick={switchModeHandler}>
+            {isLoginMode ? "Create an account" : "Log in instead"}
+          </button>
+        </p>
       </Card>
     </React.Fragment>
   );

@@ -1,15 +1,44 @@
-.authentication__header {
-  color: white;
-  text-align: center;
-}
-
-.authentication {
-  width: 90%;
-  max-width: 25rem;
-  margin: 7rem auto;
+.authentication.card {
+  width: 100%;
+  max-width: 26rem;
+  margin: 2rem auto;
+  padding: 2rem 1.75rem;
   text-align: left;
 }
 
+.authentication__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.authentication__subtitle {
+  margin: 0.35rem 0 1.75rem;
+  color: var(--color-text-muted);
+}
+
 .authentication form {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.authentication__switch {
+  margin: 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+}
+
+.authentication__switch button {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.authentication__switch button:hover {
+  text-decoration: underline;
 }

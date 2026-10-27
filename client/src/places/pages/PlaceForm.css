@@ -1,10 +1,31 @@
 .place-form {
-  list-style: none;
+  position: relative;
   margin: 0 auto;
-  padding: 1rem;
-  width: 90%;
+  padding: 2rem 1.75rem;
+  width: 100%;
   max-width: 40rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.26);
-  border-radius: 6px;
-  background: white;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.place-form__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.place-form__subtitle {
+  margin: 0.35rem 0 1.75rem;
+  color: var(--color-text-muted);
+}
+
+.place-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
 }

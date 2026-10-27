@@ -5,8 +5,10 @@ import Button from "../../shared/components/FormElements/Button";
 import Modal from "../../shared/components/UIElements/Modal";
 import ErrorModal from "../../shared/components/UIElements/ErrorModal";
 import LoadingSpinner from "../../shared/components/UIElements/LoadingSpinner";
+import Map from "./Map";
 import { AuthContext } from "../../shared/context/auth-context";
 import { useHttpClient } from "../../shared/hooks/http-hook";
+import { BACKEND_URL, assetUrl } from "../../shared/util/config";
 import "./PlaceItem.css";
 
 const PlaceItem = (props) => {
@@ -31,17 +33,14 @@ const PlaceItem = (props) => {
     setShowConfirmModal(false);
 
     try {
-      await sendRequest(
-        `${process.env.REACT_APP_BACKEND_URL}/places/${props.id}`,
-        "DELETE",
-        null,
-        {
-          Authorization: "Bearer " + auth.token,
-        }
-      );
+      await sendRequest(`${BACKEND_URL}/places/${props.id}`, "DELETE", null, {
+        Authorization: "Bearer " + auth.token,
+      });
       props.onDelete(props.id);
     } catch (err) {}
   };
+
+  const isOwner = auth.userId === props.creatorId;
 
   return (
     <React.Fragment>
@@ -50,33 +49,28 @@ const PlaceItem = (props) => {
         show={showMap}
         onCancel={closeMapHandler}
         header={props.address}
-        contentClass="place-item__modal-content"
-        footerClass="place-item__modal-actions"
-        footer={<Button onClick={closeMapHandler}>CLOSE</Button>}
+        footer={<Button onClick={closeMapHandler}>Close</Button>}
       >
-        <div className="map-container">
-          <h1>The Map!</h1>
-        </div>
+        <Map center={props.coordinates} title={`Map of ${props.address}`} />
       </Modal>
       <Modal
         show={showConfirmModal}
         onCancel={cancelDeleteHandler}
-        header="Are you sure?"
-        footerClass="place-item__modal-actions"
+        header="Delete this place?"
         footer={
           <React.Fragment>
-            <Button inverse onClick={cancelDeleteHandler}>
-              CANCEL
+            <Button ghost onClick={cancelDeleteHandler} autoFocus>
+              Cancel
             </Button>
             <Button danger onClick={confirmDeleteHandler}>
-              DELETE
+              Delete
             </Button>
           </React.Fragment>
         }
       >
         <p>
-          Do you want to proceed and delete this place? Please note that it
-          can't be undone thereafter.
+          &ldquo;{props.title}&rdquo; will be permanently deleted. This can't be
+          undone.
         </p>
       </Modal>
       <li className="place-item">
@@ -84,28 +78,38 @@ const PlaceItem = (props) => {
           {isLoading && <LoadingSpinner asOverlay />}
           <div className="place-item__image">
             <img
-              src={`${process.env.REACT_APP_ASSET_URL}/${props.image}`}
+              src={assetUrl(props.image)}
               alt={props.title}
+              loading="lazy"
+              decoding="async"
             />
           </div>
           <div className="place-item__info">
             <h2>{props.title}</h2>
-            <h3>{props.address}</h3>
-            <p>{props.description}</p>
+            <p className="place-item__address">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                <path
+                  d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"
+                  fill="currentColor"
+                />
+              </svg>
+              {props.address}
+            </p>
+            <p className="place-item__description">{props.description}</p>
           </div>
           <div className="place-item__actions">
-            <Button inverse onClick={openMapHandler}>
-              VIEW ON MAP
+            <Button size="small" inverse onClick={openMapHandler}>
+              View on map
             </Button>
-
-            {auth.userId === props.creatorId && (
-              <Button to={`/places/${props.id}`}>EDIT</Button>
-            )}
-
-            {auth.userId === props.creatorId && (
-              <Button danger onClick={showDeleteWarningHandler}>
-                DELETE
-              </Button>
+            {isOwner && (
+              <div className="place-item__owner-actions">
+                <Button size="small" ghost to={`/places/${props.id}`}>
+                  Edit
+                </Button>
+                <Button size="small" danger onClick={showDeleteWarningHandler}>
+                  Delete
+                </Button>
+              </div>
             )}
           </div>
         </Card>

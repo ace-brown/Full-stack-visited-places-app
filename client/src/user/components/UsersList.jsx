@@ -7,11 +7,10 @@ import "./UsersList.css";
 const UsersList = (props) => {
   if (props.items.length === 0) {
     return (
-      <div className="center">
-        <Card>
-          <h2>No user found.</h2>
-        </Card>
-      </div>
+      <Card className="empty-state">
+        <h2>No users found</h2>
+        <p>Be the first to sign up and share the places you have visited.</p>
+      </Card>
     );
   }
   return (

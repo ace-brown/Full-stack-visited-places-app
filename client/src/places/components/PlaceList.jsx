@@ -8,12 +8,17 @@ import "./PlaceList.css";
 const PlaceList = (props) => {
   if (props.items.length === 0) {
     return (
-      <div className="place-list center">
-        <Card>
-          <h2>No places found. Maybe create one?</h2>
-          <Button to="/places/new">Share Place</Button>
-        </Card>
-      </div>
+      <Card className="empty-state">
+        <h2>No places yet</h2>
+        {props.isOwner ? (
+          <React.Fragment>
+            <p>Share the first place you have visited.</p>
+            <Button to="/places/new">Share a place</Button>
+          </React.Fragment>
+        ) : (
+          <p>This traveler hasn't shared any places yet.</p>
+        )}
+      </Card>
     );
   }
 

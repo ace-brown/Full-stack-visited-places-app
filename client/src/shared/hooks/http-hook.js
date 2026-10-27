@@ -1,17 +1,17 @@
-import React, { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
 export const useHttpClient = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState();
 
-  const activeHttpRequests = useRef([]);
+  const activeHttpRequests = useRef(new Set());
 
   const sendRequest = useCallback(
     async (url, method = "GET", body = null, headers = {}) => {
       setIsLoading(true);
 
       const httpAbortCtrl = new AbortController();
-      activeHttpRequests.current.push(httpAbortCtrl);
+      activeHttpRequests.current.add(httpAbortCtrl);
 
       try {
         const response = await fetch(url, {
@@ -21,34 +21,42 @@ export const useHttpClient = () => {
           signal: httpAbortCtrl.signal,
         });
 
-        const responseData = await response.json();
-
-        activeHttpRequests.current = activeHttpRequests.current.filter(
-          (reqCtrl) => reqCtrl !== httpAbortCtrl
-        );
+        const responseData = await response.json().catch(() => ({}));
 
         if (!response.ok) {
-          throw new Error(responseData.message);
+          throw new Error(
+            responseData.message || "Something went wrong, please try again."
+          );
         }
 
         setIsLoading(false);
         return responseData;
       } catch (err) {
-        setError(err.message);
-        setIsLoading(false);
+        // Aborted requests belong to an unmounted component, so stay quiet
+        if (err.name !== "AbortError") {
+          setError(
+            err instanceof TypeError
+              ? "Could not reach the server, please check your connection."
+              : err.message
+          );
+          setIsLoading(false);
+        }
         throw err;
+      } finally {
+        activeHttpRequests.current.delete(httpAbortCtrl);
       }
     },
     []
   );
 
-  const clearError = () => {
+  const clearError = useCallback(() => {
     setError(null);
-  };
+  }, []);
 
   useEffect(() => {
+    const requests = activeHttpRequests.current;
     return () => {
-      activeHttpRequests.current.forEach((abortCtrl) => abortCtrl.abort());
+      requests.forEach((abortCtrl) => abortCtrl.abort());
     };
   }, []);
 

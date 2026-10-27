@@ -4,11 +4,14 @@ import "./Avatar.css";
 
 const Avatar = (props) => {
   return (
-    <div className={`avatar ${props.className}`} style={props.style}>
+    <div className={`avatar ${props.className || ""}`} style={props.style}>
       <img
         src={props.image}
         alt={props.alt}
-        style={{ width: props.width, height: props.width }}
+        width={props.width}
+        height={props.width}
+        loading="lazy"
+        decoding="async"
       />
     </div>
   );

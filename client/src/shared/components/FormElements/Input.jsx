@@ -50,35 +50,36 @@ const Input = (props) => {
     });
   };
 
+  const showError = !inputState.isValid && inputState.isTouched;
+  const errorId = `${props.id}-error`;
+
+  const sharedProps = {
+    id: props.id,
+    placeholder: props.placeholder,
+    autoComplete: props.autoComplete,
+    onChange: changeHandler,
+    onBlur: touchHandler,
+    value: inputState.value,
+    "aria-invalid": showError,
+    "aria-describedby": showError ? errorId : undefined,
+  };
+
   const element =
     props.element === "input" ? (
-      <input
-        id={props.id}
-        type={props.type}
-        placeholder={props.placeholder}
-        onChange={changeHandler}
-        onBlur={touchHandler}
-        value={inputState.value}
-      />
+      <input type={props.type} {...sharedProps} />
     ) : (
-      <textarea
-        id={props.id}
-        rows={props.rows || 3}
-        onChange={changeHandler}
-        onBlur={touchHandler}
-        value={inputState.value}
-      />
+      <textarea rows={props.rows || 4} {...sharedProps} />
     );
 
   return (
-    <div
-      className={`form-control ${
-        !inputState.isValid && inputState.isTouched && "form-control--invalid"
-      }`}
-    >
+    <div className={`form-control ${showError ? "form-control--invalid" : ""}`}>
       <label htmlFor={props.id}>{props.label}</label>
       {element}
-      {!inputState.isValid && inputState.isTouched && <p>{props.errorText}</p>}
+      {showError && (
+        <p className="form-control__error" id={errorId}>
+          {props.errorText}
+        </p>
+      )}
     </div>
   );
 };

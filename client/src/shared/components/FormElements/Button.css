@@ -1,61 +1,87 @@
 .button {
   font: inherit;
-  padding: 0.5rem 1.5rem;
-  border: 1px solid #ff0055;
-  border-radius: 4px;
-  background: #ff0055;
-  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  padding: 0.65rem 1.25rem;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-on-primary);
   cursor: pointer;
-  margin-right: 1rem;
   text-decoration: none;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  transition: background-color var(--transition), border-color var(--transition),
+    color var(--transition), transform var(--transition),
+    box-shadow var(--transition);
 }
 
-.button:focus {
-  outline: none;
+.button:hover {
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
 }
 
-.button:hover,
 .button:active {
-  background: #ff4382;
-  border-color: #ff4382;
+  transform: translateY(1px);
 }
 
 .button--inverse {
   background: transparent;
-  color: #ff0055;
+  color: var(--color-primary);
 }
 
-.button--inverse:hover,
-.button--inverse:active {
-  color: white;
-  background: #ff0055;
+.button--inverse:hover {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.button--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--color-text-muted);
+}
+
+.button--ghost:hover {
+  background: var(--color-surface-2);
+  border-color: transparent;
+  color: var(--color-text);
 }
 
 .button--danger {
-  background: #830000;
-  border-color: #830000;
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: #fff;
 }
 
-.button--danger:hover,
-.button--danger:active {
-  background: #f34343;
-  border-color: #f34343;
+.button--danger:hover {
+  background: var(--color-danger-hover);
+  border-color: var(--color-danger-hover);
 }
 
 .button:disabled,
-.button:hover:disabled,
-.button:active:disabled {
-  background: #ccc;
-  color: #979797;
-  border-color: #ccc;
+.button:disabled:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text-muted);
+  border-color: var(--color-border);
   cursor: not-allowed;
+  transform: none;
 }
 
 .button--small {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
+  padding: 0.45rem 0.9rem;
 }
 
 .button--big {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
+  padding: 0.85rem 1.75rem;
+}
+
+.button--block {
+  width: 100%;
 }
